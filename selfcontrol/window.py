@@ -89,13 +89,18 @@ class SelfControlWindow(Adw.ApplicationWindow):
         self._content_box.append(self._idle_box)
 
         # -- Blocking widgets (hidden initially) --
-        self._blocking_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        self._blocking_box.set_margin_top(24)
+        self._blocking_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        self._blocking_box.set_margin_top(16)
         self._blocking_box.set_margin_start(24)
         self._blocking_box.set_margin_end(24)
         self._blocking_box.set_vexpand(True)
         self._blocking_box.set_valign(Gtk.Align.CENTER)
         self._blocking_box.set_visible(False)
+
+        self._skull_label = Gtk.Label(label="\u2620")
+        self._skull_label.add_css_class("skull-icon")
+        self._skull_label.set_halign(Gtk.Align.CENTER)
+        self._blocking_box.append(self._skull_label)
 
         self._countdown_label = Gtk.Label(label="0:00:00")
         self._countdown_label.add_css_class("countdown-label")
