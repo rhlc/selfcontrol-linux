@@ -116,7 +116,6 @@ class SelfControlWindow(Adw.ApplicationWindow):
         self._blocking_box.append(self._skull_label)
 
         self._countdown_label = Gtk.Label()
-        self._countdown_label.add_css_class("countdown-label")
         self._countdown_label.set_halign(Gtk.Align.CENTER)
         self._blocking_box.append(self._countdown_label)
 
@@ -183,7 +182,7 @@ class SelfControlWindow(Adw.ApplicationWindow):
         self._blocking = True
         self._idle_box.set_visible(False)
         self._blocking_box.set_visible(True)
-        self._countdown_label.set_label(format_countdown(remaining))
+        self._countdown_label.set_markup(f'<span size="50000" weight="light">{format_countdown(remaining)}</span>')
         self._edit_btn.set_sensitive(False)
 
     def _set_idle_mode(self):
