@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=SelfControl
+Comment=Block distracting websites for a set duration
+Exec=selfcontrol
+Icon=preferences-system-time
+Categories=Utility;GTK;
+Keywords=block;focus;productivity;distraction;

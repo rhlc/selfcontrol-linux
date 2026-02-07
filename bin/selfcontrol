@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+import sys
+import os
+
+# When installed, the package lives at /usr/lib/selfcontrol-linux/
+# When running from source, it's the parent of this script's directory.
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_dir = os.path.dirname(script_dir)
+
+# Check installed location first, then source tree
+installed_dir = "/usr/lib/selfcontrol-linux"
+if os.path.isdir(os.path.join(installed_dir, "selfcontrol")):
+    sys.path.insert(0, installed_dir)
+else:
+    sys.path.insert(0, project_dir)
+
+from selfcontrol.app import main
+
+main()
