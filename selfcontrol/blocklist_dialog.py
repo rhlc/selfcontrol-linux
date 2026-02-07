@@ -8,13 +8,14 @@ from gi.repository import Adw, Gtk
 
 class BlocklistDialog(Adw.Dialog):
     def __init__(self, client):
-        super().__init__(title="Edit Blocklist", content_width=400, content_height=450)
+        super().__init__(title="Edit Blocklist", content_width=420, content_height=480)
 
         self._client = client
         self._domains = []
 
         # Header bar with Cancel/Save
         header = Adw.HeaderBar()
+
         cancel_btn = Gtk.Button(label="Cancel")
         cancel_btn.connect("clicked", lambda b: self.close())
         header.pack_start(cancel_btn)
@@ -25,21 +26,24 @@ class BlocklistDialog(Adw.Dialog):
         header.pack_end(save_btn)
 
         # Main content
-        content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
-        content_box.set_margin_top(12)
-        content_box.set_margin_bottom(12)
-        content_box.set_margin_start(12)
-        content_box.set_margin_end(12)
+        content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=16)
+        content_box.set_margin_top(16)
+        content_box.set_margin_bottom(16)
+        content_box.set_margin_start(16)
+        content_box.set_margin_end(16)
 
         # Add domain row
         add_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+
         self._entry = Gtk.Entry()
         self._entry.set_placeholder_text("example.com")
         self._entry.set_hexpand(True)
         self._entry.connect("activate", self._on_add)
         add_box.append(self._entry)
 
-        add_btn = Gtk.Button(label="Add")
+        add_btn = Gtk.Button(icon_name="list-add-symbolic")
+        add_btn.add_css_class("suggested-action")
+        add_btn.set_tooltip_text("Add domain")
         add_btn.connect("clicked", self._on_add)
         add_box.append(add_btn)
 
@@ -56,7 +60,7 @@ class BlocklistDialog(Adw.Dialog):
         scrolled.set_child(self._list_box)
         content_box.append(scrolled)
 
-        # Toolbar view to combine header + content
+        # Assemble
         toolbar = Adw.ToolbarView()
         toolbar.add_top_bar(header)
         toolbar.set_content(content_box)
@@ -73,7 +77,6 @@ class BlocklistDialog(Adw.Dialog):
         self._rebuild_list()
 
     def _rebuild_list(self):
-        # Remove all rows
         while True:
             row = self._list_box.get_row_at_index(0)
             if row is None:
@@ -81,34 +84,23 @@ class BlocklistDialog(Adw.Dialog):
             self._list_box.remove(row)
 
         for domain in self._domains:
-            row = self._make_row(domain)
-            self._list_box.append(row)
+            self._list_box.append(self._make_row(domain))
 
     def _make_row(self, domain):
-        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        box.set_margin_top(6)
-        box.set_margin_bottom(6)
-        box.set_margin_start(12)
-        box.set_margin_end(6)
-
-        label = Gtk.Label(label=domain)
-        label.set_hexpand(True)
-        label.set_xalign(0)
-        box.append(label)
-
-        remove_btn = Gtk.Button(icon_name="user-trash-symbolic")
+        row = Adw.ActionRow(title=domain)
+        remove_btn = Gtk.Button(icon_name="edit-delete-symbolic")
         remove_btn.add_css_class("flat")
+        remove_btn.set_valign(Gtk.Align.CENTER)
+        remove_btn.set_tooltip_text("Remove")
         remove_btn.connect("clicked", self._on_remove, domain)
-        box.append(remove_btn)
-
-        return box
+        row.add_suffix(remove_btn)
+        return row
 
     def _on_add(self, widget):
         text = self._entry.get_text().strip().lower()
         if not text or text in self._domains:
             return
 
-        # Strip common prefixes
         for prefix in ("https://", "http://", "www."):
             if text.startswith(prefix):
                 text = text[len(prefix):]
@@ -120,6 +112,7 @@ class BlocklistDialog(Adw.Dialog):
         self._domains.append(text)
         self._list_box.append(self._make_row(text))
         self._entry.set_text("")
+        self._entry.grab_focus()
 
     def _on_remove(self, btn, domain):
         if domain in self._domains:

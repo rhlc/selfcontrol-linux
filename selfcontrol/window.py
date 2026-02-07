@@ -44,55 +44,68 @@ def blocklist_summary(domains):
 
 class SelfControlWindow(Adw.ApplicationWindow):
     def __init__(self, app):
-        super().__init__(application=app, title="SelfControl", default_width=500, default_height=300, resizable=False)
+        super().__init__(application=app, title="SelfControl", default_width=480, default_height=340, resizable=False)
 
         self._client = None
         self._blocking = False
 
         # Header bar
         header = Adw.HeaderBar()
-        header.set_title_widget(Gtk.Label(label="SelfControl"))
+        title_label = Gtk.Label(label="SelfControl")
+        title_label.add_css_class("title")
+        header.set_title_widget(title_label)
 
         # Main content area
         self._content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         self._content_box.set_vexpand(True)
 
-        # -- Idle widgets --
-        self._idle_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
-        self._idle_box.set_margin_top(16)
-        self._idle_box.set_margin_start(24)
-        self._idle_box.set_margin_end(24)
+        # -- Idle view --
+        self._idle_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         self._idle_box.set_vexpand(True)
 
-        # Start Block button (centered)
+        # Start Block button area
+        btn_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        btn_box.set_margin_top(24)
+        btn_box.set_margin_bottom(20)
         self._start_btn = Gtk.Button(label="Start Block")
         self._start_btn.add_css_class("suggested-action")
+        self._start_btn.add_css_class("pill")
         self._start_btn.add_css_class("start-block-button")
         self._start_btn.set_halign(Gtk.Align.CENTER)
         self._start_btn.connect("clicked", self._on_start_clicked)
-        self._idle_box.append(self._start_btn)
+        btn_box.append(self._start_btn)
+        self._idle_box.append(btn_box)
 
-        # Duration label
+        # Duration + slider in a clamp for nice width
+        slider_clamp = Adw.Clamp(maximum_size=420)
+        slider_clamp.set_margin_start(24)
+        slider_clamp.set_margin_end(24)
+        slider_inner = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+
         self._duration_label = Gtk.Label(label="1 hour")
         self._duration_label.add_css_class("duration-label")
         self._duration_label.set_xalign(0)
-        self._idle_box.append(self._duration_label)
+        slider_inner.append(self._duration_label)
 
-        # Slider
         self._scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0.25, 24.0, 0.25)
         self._scale.set_value(1.0)
         self._scale.set_draw_value(False)
         self._scale.set_hexpand(True)
         self._scale.connect("value-changed", self._on_scale_changed)
-        self._idle_box.append(self._scale)
+        slider_inner.append(self._scale)
+
+        slider_clamp.set_child(slider_inner)
+        self._idle_box.append(slider_clamp)
+
+        # Spacer to push bottom bar down
+        spacer = Gtk.Box()
+        spacer.set_vexpand(True)
+        self._idle_box.append(spacer)
 
         self._content_box.append(self._idle_box)
 
-        # -- Blocking widgets (hidden initially) --
-        self._blocking_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-        self._blocking_box.set_margin_top(16)
-        self._blocking_box.set_margin_start(24)
-        self._blocking_box.set_margin_end(24)
+        # -- Blocking view (hidden initially) --
+        self._blocking_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
         self._blocking_box.set_vexpand(True)
         self._blocking_box.set_valign(Gtk.Align.CENTER)
         self._blocking_box.set_visible(False)
@@ -109,20 +122,25 @@ class SelfControlWindow(Adw.ApplicationWindow):
 
         self._content_box.append(self._blocking_box)
 
-        # -- Bottom bar (always visible) --
-        bottom_bar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        bottom_bar.set_margin_top(8)
-        bottom_bar.set_margin_bottom(16)
-        bottom_bar.set_margin_start(24)
-        bottom_bar.set_margin_end(24)
+        # -- Bottom bar --
+        separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+        self._content_box.append(separator)
+
+        bottom_bar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+        bottom_bar.set_margin_top(12)
+        bottom_bar.set_margin_bottom(12)
+        bottom_bar.set_margin_start(20)
+        bottom_bar.set_margin_end(20)
 
         self._summary_label = Gtk.Label(label="")
         self._summary_label.add_css_class("summary-label")
         self._summary_label.set_xalign(0)
         self._summary_label.set_hexpand(True)
+        self._summary_label.set_ellipsize(3)  # PANGO_ELLIPSIZE_END
         bottom_bar.append(self._summary_label)
 
         self._edit_btn = Gtk.Button(label="Edit Blocklist")
+        self._edit_btn.add_css_class("flat")
         self._edit_btn.connect("clicked", self._on_edit_clicked)
         bottom_bar.append(self._edit_btn)
 

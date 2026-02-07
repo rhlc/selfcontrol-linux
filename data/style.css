@@ -1,7 +1,7 @@
 .start-block-button {
-    min-height: 36px;
-    min-width: 160px;
-    font-size: 14px;
+    min-height: 40px;
+    min-width: 180px;
+    font-size: 15px;
 }
 
 .duration-label {
@@ -10,14 +10,17 @@
 }
 
 .skull-icon {
-    font-size: 64px;
+    font-size: 72px;
+    margin-bottom: 4px;
 }
 
 .countdown-label {
-    font-size: 48px;
+    font-size: 52px;
     font-weight: 300;
+    letter-spacing: 2px;
 }
 
 .summary-label {
     font-size: 13px;
+    opacity: 0.8;
 }
