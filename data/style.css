@@ -1,14 +1,19 @@
 .start-block-button {
-    min-height: 48px;
-    font-size: 16px;
+    min-height: 36px;
+    min-width: 160px;
+    font-size: 14px;
 }
 
 .duration-label {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
+}
+
+.countdown-label {
+    font-size: 48px;
+    font-weight: 300;
 }
 
 .summary-label {
     font-size: 13px;
-    opacity: 0.7;
 }

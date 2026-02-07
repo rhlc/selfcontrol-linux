@@ -39,62 +39,95 @@ def blocklist_summary(domains):
     if len(domains) == 2:
         return f"Blocking {domains[0]} and {domains[1]}"
     others = len(domains) - 2
-    return f"Blocking {domains[0]}, {domains[1]}, and {others} others"
+    return f"Blocking {domains[0]} and {others} {'other' if others == 1 else 'others'}"
 
 
 class SelfControlWindow(Adw.ApplicationWindow):
     def __init__(self, app):
-        super().__init__(application=app, title="SelfControl", default_width=620, default_height=240, resizable=False)
+        super().__init__(application=app, title="SelfControl", default_width=500, default_height=300, resizable=False)
 
         self._client = None
         self._blocking = False
 
-        # Main layout
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=16)
-        box.set_margin_top(24)
-        box.set_margin_bottom(24)
-        box.set_margin_start(24)
-        box.set_margin_end(24)
+        # Header bar
+        header = Adw.HeaderBar()
+        header.set_title_widget(Gtk.Label(label="SelfControl"))
 
-        # Start Block button
+        # Main content area
+        self._content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        self._content_box.set_vexpand(True)
+
+        # -- Idle widgets --
+        self._idle_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        self._idle_box.set_margin_top(16)
+        self._idle_box.set_margin_start(24)
+        self._idle_box.set_margin_end(24)
+        self._idle_box.set_vexpand(True)
+
+        # Start Block button (centered)
         self._start_btn = Gtk.Button(label="Start Block")
-        self._start_btn.add_css_class("start-block-button")
         self._start_btn.add_css_class("suggested-action")
+        self._start_btn.add_css_class("start-block-button")
+        self._start_btn.set_halign(Gtk.Align.CENTER)
         self._start_btn.connect("clicked", self._on_start_clicked)
-        box.append(self._start_btn)
+        self._idle_box.append(self._start_btn)
 
-        # Slider row
-        slider_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-        slider_box.set_hexpand(True)
-
+        # Duration label
         self._duration_label = Gtk.Label(label="1 hour")
         self._duration_label.add_css_class("duration-label")
         self._duration_label.set_xalign(0)
-        self._duration_label.set_size_request(140, -1)
-        slider_box.append(self._duration_label)
+        self._idle_box.append(self._duration_label)
 
+        # Slider
         self._scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0.25, 24.0, 0.25)
         self._scale.set_value(1.0)
         self._scale.set_draw_value(False)
         self._scale.set_hexpand(True)
         self._scale.connect("value-changed", self._on_scale_changed)
-        slider_box.append(self._scale)
+        self._idle_box.append(self._scale)
 
-        box.append(slider_box)
+        self._content_box.append(self._idle_box)
 
-        # Summary label
+        # -- Blocking widgets (hidden initially) --
+        self._blocking_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        self._blocking_box.set_margin_top(24)
+        self._blocking_box.set_margin_start(24)
+        self._blocking_box.set_margin_end(24)
+        self._blocking_box.set_vexpand(True)
+        self._blocking_box.set_valign(Gtk.Align.CENTER)
+        self._blocking_box.set_visible(False)
+
+        self._countdown_label = Gtk.Label(label="0:00:00")
+        self._countdown_label.add_css_class("countdown-label")
+        self._countdown_label.set_halign(Gtk.Align.CENTER)
+        self._blocking_box.append(self._countdown_label)
+
+        self._content_box.append(self._blocking_box)
+
+        # -- Bottom bar (always visible) --
+        bottom_bar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        bottom_bar.set_margin_top(8)
+        bottom_bar.set_margin_bottom(16)
+        bottom_bar.set_margin_start(24)
+        bottom_bar.set_margin_end(24)
+
         self._summary_label = Gtk.Label(label="")
         self._summary_label.add_css_class("summary-label")
-        self._summary_label.set_xalign(0.5)
-        box.append(self._summary_label)
+        self._summary_label.set_xalign(0)
+        self._summary_label.set_hexpand(True)
+        bottom_bar.append(self._summary_label)
 
-        # Edit Blocklist button
         self._edit_btn = Gtk.Button(label="Edit Blocklist")
-        self._edit_btn.add_css_class("flat")
         self._edit_btn.connect("clicked", self._on_edit_clicked)
-        box.append(self._edit_btn)
+        bottom_bar.append(self._edit_btn)
 
-        self.set_content(box)
+        self._content_box.append(bottom_bar)
+
+        # Assemble
+        toolbar = Adw.ToolbarView()
+        toolbar.add_top_bar(header)
+        toolbar.set_content(self._content_box)
+        self.set_content(toolbar)
 
         # Connect to daemon
         self._connect_daemon()
@@ -125,20 +158,15 @@ class SelfControlWindow(Adw.ApplicationWindow):
 
     def _set_blocking_mode(self, remaining):
         self._blocking = True
-        self._start_btn.set_label(format_countdown(remaining))
-        self._start_btn.remove_css_class("suggested-action")
-        self._start_btn.add_css_class("destructive-action")
-        self._start_btn.set_sensitive(False)
-        self._scale.set_sensitive(False)
+        self._idle_box.set_visible(False)
+        self._blocking_box.set_visible(True)
+        self._countdown_label.set_label(format_countdown(remaining))
         self._edit_btn.set_sensitive(False)
 
     def _set_idle_mode(self):
         self._blocking = False
-        self._start_btn.set_label("Start Block")
-        self._start_btn.remove_css_class("destructive-action")
-        self._start_btn.add_css_class("suggested-action")
-        self._start_btn.set_sensitive(True)
-        self._scale.set_sensitive(True)
+        self._idle_box.set_visible(True)
+        self._blocking_box.set_visible(False)
         self._edit_btn.set_sensitive(True)
 
     def _update_summary(self, blocklist):
@@ -167,6 +195,7 @@ class SelfControlWindow(Adw.ApplicationWindow):
             return
 
         dialog = BlocklistDialog(self._client)
+        dialog.connect("closed", lambda d: self._refresh_status())
         dialog.present(self)
 
     def _on_timer_tick(self, remaining_seconds):

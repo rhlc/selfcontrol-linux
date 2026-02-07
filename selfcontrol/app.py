@@ -20,9 +20,9 @@ class SelfControlApp(Adw.Application):
     def do_startup(self):
         Adw.Application.do_startup(self)
 
-        # Force dark color scheme
+        # Force light color scheme (matches macOS SelfControl)
         style_manager = Adw.StyleManager.get_default()
-        style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
+        style_manager.set_color_scheme(Adw.ColorScheme.FORCE_LIGHT)
 
         # Load CSS
         css_provider = Gtk.CssProvider()
