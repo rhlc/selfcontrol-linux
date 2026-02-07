@@ -44,7 +44,7 @@ def blocklist_summary(domains):
 
 class SelfControlWindow(Adw.ApplicationWindow):
     def __init__(self, app):
-        super().__init__(application=app, title="SelfControl", default_width=480, default_height=400, resizable=False)
+        super().__init__(application=app, title="SelfControl", default_width=420, default_height=280, resizable=False)
 
         self._client = None
         self._blocking = False
