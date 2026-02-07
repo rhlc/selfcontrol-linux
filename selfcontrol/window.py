@@ -44,7 +44,7 @@ def blocklist_summary(domains):
 
 class SelfControlWindow(Adw.ApplicationWindow):
     def __init__(self, app):
-        super().__init__(application=app, title="SelfControl", default_width=480, default_height=340, resizable=False)
+        super().__init__(application=app, title="SelfControl", default_width=480, default_height=400, resizable=False)
 
         self._client = None
         self._blocking = False
@@ -110,12 +110,12 @@ class SelfControlWindow(Adw.ApplicationWindow):
         self._blocking_box.set_valign(Gtk.Align.CENTER)
         self._blocking_box.set_visible(False)
 
-        self._skull_label = Gtk.Label(label="\u2620")
-        self._skull_label.add_css_class("skull-icon")
+        self._skull_label = Gtk.Label()
+        self._skull_label.set_markup('<span size="80000">\u2620</span>')
         self._skull_label.set_halign(Gtk.Align.CENTER)
         self._blocking_box.append(self._skull_label)
 
-        self._countdown_label = Gtk.Label(label="0:00:00")
+        self._countdown_label = Gtk.Label()
         self._countdown_label.add_css_class("countdown-label")
         self._countdown_label.set_halign(Gtk.Align.CENTER)
         self._blocking_box.append(self._countdown_label)
