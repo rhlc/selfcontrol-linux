@@ -1,0 +1,7 @@
+deb/build/
+deb/*.deb
+rpm/rpmbuild/
+arch/pkg/
+arch/src/
+arch/*.pkg.tar.*
+*.tar.gz
