@@ -1,0 +1,18 @@
+post_install() {
+    systemctl daemon-reload
+    systemctl enable selfcontrol-daemon.service
+}
+
+pre_remove() {
+    systemctl stop selfcontrol-daemon.service || true
+    systemctl disable selfcontrol-daemon.service || true
+}
+
+post_remove() {
+    systemctl daemon-reload
+}
+
+post_upgrade() {
+    systemctl daemon-reload
+    systemctl try-restart selfcontrol-daemon.service || true
+}

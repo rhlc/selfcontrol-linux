@@ -1,0 +1,48 @@
+pkgname=selfcontrol-linux
+pkgver=${VERSION:-0.1.0}
+pkgrel=1
+pkgdesc="Block distracting websites for a set duration"
+arch=('any')
+url="https://github.com/selfcontrol-linux/selfcontrol-linux"
+license=('GPL3')
+depends=('python' 'python-gobject' 'gtk4' 'libadwaita' 'python-dbus' 'nftables')
+install=selfcontrol-linux.install
+source=()
+# Source is the local tree; nothing to download
+noextract=()
+md5sums=()
+
+_srcdir="${SRCDIR:-$(cd ../.. && pwd)}"
+
+package() {
+    # Python packages
+    install -d "$pkgdir/usr/lib/selfcontrol-linux"
+    cp -r "$_srcdir/selfcontrol" "$pkgdir/usr/lib/selfcontrol-linux/"
+    cp -r "$_srcdir/selfcontrol_daemon" "$pkgdir/usr/lib/selfcontrol-linux/"
+    cp -r "$_srcdir/data" "$pkgdir/usr/lib/selfcontrol-linux/"
+
+    # Launcher scripts
+    install -Dm755 "$_srcdir/bin/selfcontrol" "$pkgdir/usr/bin/selfcontrol"
+    install -Dm755 "$_srcdir/bin/selfcontrol-daemon" "$pkgdir/usr/libexec/selfcontrol-daemon"
+
+    # systemd service
+    install -Dm644 "$_srcdir/data/selfcontrol-daemon.service" \
+        "$pkgdir/usr/lib/systemd/system/selfcontrol-daemon.service"
+
+    # D-Bus config
+    install -Dm644 "$_srcdir/data/com.github.selfcontrol.conf" \
+        "$pkgdir/usr/share/dbus-1/system.d/com.github.selfcontrol.conf"
+    install -Dm644 "$_srcdir/data/com.github.selfcontrol.service" \
+        "$pkgdir/usr/share/dbus-1/system-services/com.github.selfcontrol.service"
+
+    # Polkit policy
+    install -Dm644 "$_srcdir/data/com.github.selfcontrol.policy" \
+        "$pkgdir/usr/share/polkit-1/actions/com.github.selfcontrol.policy"
+
+    # Desktop entry
+    install -Dm644 "$_srcdir/data/com.github.selfcontrol.desktop" \
+        "$pkgdir/usr/share/applications/com.github.selfcontrol.desktop"
+
+    # State directory
+    install -d "$pkgdir/var/lib/selfcontrol-linux"
+}
