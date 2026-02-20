@@ -14,10 +14,38 @@ A Linux port of the macOS [SelfControl](https://github.com/SelfControlApp/selfco
 
 ## Requirements
 
-- Fedora Linux (tested on Fedora 43, should work on 38+)
-- GNOME desktop (GTK4 / libadwaita)
+- Linux with GNOME desktop (GTK4 / libadwaita)
+- Tested on Fedora 43, Ubuntu 24.04, Arch Linux
 
 ## Installation
+
+### Debian / Ubuntu
+
+Download the `.deb` from the [latest release](https://github.com/rhlc/selfcontrol-linux/releases/latest):
+
+```bash
+sudo apt install ./selfcontrol-linux_0.1.0_all.deb
+```
+
+### Fedora / RHEL
+
+Download the `.rpm` from the [latest release](https://github.com/rhlc/selfcontrol-linux/releases/latest):
+
+```bash
+sudo dnf install ./selfcontrol-linux-0.1.0-1.fc43.noarch.rpm
+```
+
+### Arch Linux
+
+Download the source tarball from the [latest release](https://github.com/rhlc/selfcontrol-linux/releases/latest), extract it, then build with the included PKGBUILD:
+
+```bash
+tar xzf selfcontrol-linux-0.1.0.tar.gz
+cd selfcontrol-linux-0.1.0/packaging/arch
+VERSION=0.1.0 SRCDIR="$PWD/../.." makepkg -si
+```
+
+### From source
 
 ```bash
 git clone https://github.com/rhlc/selfcontrol-linux.git
@@ -25,7 +53,7 @@ cd selfcontrol-linux
 sudo bash setup.sh
 ```
 
-This installs all dependencies, copies files to system directories, and enables the daemon service.
+This installs all dependencies (Fedora only), copies files to system directories, and enables the daemon service.
 
 ## Usage
 
@@ -43,8 +71,17 @@ That's it. Wait it out.
 
 ## Uninstalling
 
+If installed via a package:
+
 ```bash
-# Remove installed files
+sudo apt remove selfcontrol-linux    # Debian/Ubuntu
+sudo dnf remove selfcontrol-linux    # Fedora/RHEL
+sudo pacman -R selfcontrol-linux     # Arch
+```
+
+If installed from source:
+
+```bash
 sudo rm -rf /usr/lib/selfcontrol-linux
 sudo rm /usr/bin/selfcontrol /usr/libexec/selfcontrol-daemon
 sudo rm /usr/share/dbus-1/system.d/com.github.selfcontrol.conf
